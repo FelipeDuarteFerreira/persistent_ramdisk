@@ -1,0 +1,42 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          ramdisk
+# Required-Start:    $local_fs
+# Required-Stop:     $local_fs networking
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Description:       ramdisk backup script
+### END INIT INFO
+
+# /etc/init.d/ramdisk
+#
+# from http://www.observium.org/docs/persistent_ramdisk/
+
+case "$1" in
+
+start)
+    echo "Copying files to ramdisk"
+    cd /media
+    tar --lzop -xvf ramdisk-backup.tar.lzop
+    echo [`date +"%Y-%m-%d %H:%M"`] Ramdisk Synched from HD >> /var/log/ramdisk_sync.log
+    ;;
+sync)
+    echo "Synching files from ramdisk to Harddisk"
+    echo [`date +"%Y-%m-%d %H:%M"`] Ramdisk Synched to HD >> /var/log/ramdisk_sync.log
+    cd /media
+    mv -f ramdisk-backup.tar.lzop ramdisk-backup-old.tar.lzop
+    tar --lzop -cvf ramdisk-backup.tar.lzop ramdisk
+    ;;
+stop)
+    echo "Synching logfiles from ramdisk to Harddisk"
+    echo [`date +"%Y-%m-%d %H:%M"`] Ramdisk Synched to HD >> /var/log/ramdisk_sync.log
+    cd /media
+    tar --lzop -cvf ramdisk-backup.tar.lzop ramdisk
+    ;;
+*)
+    echo "Usage: /etc/init.d/ramdisk {start|stop|sync}"
+    exit 1
+    ;;
+esac
+
+
